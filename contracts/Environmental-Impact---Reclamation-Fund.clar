@@ -31,6 +31,7 @@
 (define-data-var next-project-id uint u1)
 (define-data-var total-deposits uint u0)
 (define-data-var total-released uint u0)
+(define-data-var contract-paused bool false)
 
 (define-public (add-verifier (verifier principal))
     (begin
@@ -46,12 +47,27 @@
     )
 )
 
+(define-public (pause-contract)
+    (begin
+        (asserts! (is-eq tx-sender CONTRACT_OWNER) (err ERR_NOT_AUTHORIZED))
+        (ok (var-set contract-paused true))
+    )
+)
+
+(define-public (unpause-contract)
+    (begin
+        (asserts! (is-eq tx-sender CONTRACT_OWNER) (err ERR_NOT_AUTHORIZED))
+        (ok (var-set contract-paused false))
+    )
+)
+
 (define-public (create-project (deposit-amount uint) (verification-required uint))
-    (let 
+    (let
         (
             (project-id (var-get next-project-id))
             (current-balance (stx-get-balance tx-sender))
         )
+        (asserts! (not (var-get contract-paused)) (err ERR_NOT_AUTHORIZED))
         (asserts! (>= current-balance deposit-amount) (err ERR_INSUFFICIENT_FUNDS))
         (asserts! (is-none (map-get? projects {project-id: project-id})) (err ERR_PROJECT_ALREADY_EXISTS))
         (asserts! (> verification-required u0) (err ERR_INVALID_VERIFICATION))
@@ -118,12 +134,13 @@
 )
 
 (define-public (release-funds (project-id uint))
-    (let 
+    (let
         (
             (project (unwrap! (map-get? projects {project-id: project-id}) (err ERR_PROJECT_NOT_FOUND)))
             (company (get company project))
             (deposit-amount (get deposit-amount project))
         )
+        (asserts! (not (var-get contract-paused)) (err ERR_NOT_AUTHORIZED))
         (asserts! (is-eq tx-sender company) (err ERR_NOT_AUTHORIZED))
         (asserts! (is-eq (get status project) "verified") (err ERR_PROJECT_NOT_ACTIVE))
         (asserts! (>= (get verifications-received project) (get verification-required project)) (err ERR_INVALID_VERIFICATION))
