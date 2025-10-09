@@ -158,6 +158,26 @@
     )
 )
 
+(define-public (cancel-project (project-id uint))
+    (let
+        (
+            (project (unwrap! (map-get? projects {project-id: project-id}) (err ERR_PROJECT_NOT_FOUND)))
+            (company (get company project))
+            (deposit-amount (get deposit-amount project))
+        )
+        (asserts! (is-eq tx-sender company) (err ERR_NOT_AUTHORIZED))
+        (asserts! (is-eq (get status project) "active") (err ERR_PROJECT_NOT_ACTIVE))
+        (asserts! (is-eq (get verifications-received project) u0) (err ERR_INVALID_VERIFICATION))
+        (try! (as-contract (stx-transfer? deposit-amount tx-sender company)))
+        (map-set projects
+            {project-id: project-id}
+            (merge project {status: "cancelled"})
+        )
+        (var-set total-deposits (- (var-get total-deposits) deposit-amount))
+        (ok deposit-amount)
+    )
+)
+
 (define-public (emergency-release (project-id uint))
     (let 
         (

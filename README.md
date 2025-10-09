@@ -9,10 +9,11 @@ The Environmental Impact & Reclamation Fund is a smart contract solution that ad
 ## ✨ Key Features
 
 - 💰 **Secure Fund Deposits**: Mining companies must deposit reclamation funds before starting operations
-- 🔍 **Third-Party Verification**: Multiple independent verifiers must confirm restoration completion  
+- 🔍 **Third-Party Verification**: Multiple independent verifiers must confirm restoration completion
 - 📊 **Public Progress Tracking**: Transparent monitoring of all restoration projects
 - 🔐 **Escrow Protection**: Funds remain locked until verification requirements are met
 - 🚨 **Emergency Controls**: Contract owner can release funds in exceptional circumstances
+- 🔄 **Project Cancellation**: Companies can cancel active projects and receive full refunds
 
 ## 🚀 Getting Started
 
@@ -45,6 +46,11 @@ cd my-reclamation-fund
    (contract-call? .environmental-impact-reclamation-fund release-funds u1)
    ```
 
+3. **Cancel Project** (before verification)
+   ```clarity
+   (contract-call? .environmental-impact-reclamation-fund cancel-project u1)
+   ```
+
 ### For Verifiers 🔍
 
 1. **Verify Restoration**
@@ -73,6 +79,7 @@ cd my-reclamation-fund
 | `create-project` | Deposit funds and create new project | Mining Companies |
 | `verify-restoration` | Submit restoration verification | Authorized Verifiers |
 | `release-funds` | Release escrowed funds | Project Owner |
+| `cancel-project` | Cancel active project and refund deposit | Project Owner |
 | `add-verifier` | Add authorized verifier | Contract Owner |
 | `remove-verifier` | Remove verifier authorization | Contract Owner |
 | `emergency-release` | Emergency fund release | Contract Owner |
@@ -92,12 +99,13 @@ cd my-reclamation-fund
 ```
 Active → Verified → Released
    ↓         ↑
-Emergency Released
+Cancelled    Emergency Released
 ```
 
 - **Active**: Project created, awaiting verifications
 - **Verified**: Required verifications received
 - **Released**: Funds returned to mining company
+- **Cancelled**: Project cancelled by company, funds refunded
 - **Emergency Released**: Funds released by contract owner
 
 ## 🔐 Security Features
