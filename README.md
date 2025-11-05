@@ -14,6 +14,7 @@ The Environmental Impact & Reclamation Fund is a smart contract solution that ad
 - 🔐 **Escrow Protection**: Funds remain locked until verification requirements are met
 - 🚨 **Emergency Controls**: Contract owner can release funds in exceptional circumstances
 - 🔄 **Project Cancellation**: Companies can cancel active projects and receive full refunds
+- 🎯 **Project Milestones**: Track detailed restoration progress with customizable milestone checkpoints
 
 ## 🚀 Getting Started
 
@@ -47,9 +48,19 @@ cd my-reclamation-fund
    ```
 
 3. **Cancel Project** (before verification)
-   ```clarity
-   (contract-call? .environmental-impact-reclamation-fund cancel-project u1)
-   ```
+    ```clarity
+    (contract-call? .environmental-impact-reclamation-fund cancel-project u1)
+    ```
+
+4. **Add Milestone**
+    ```clarity
+    (contract-call? .environmental-impact-reclamation-fund add-milestone u1 "Soil preparation completed")
+    ```
+
+5. **Complete Milestone**
+    ```clarity
+    (contract-call? .environmental-impact-reclamation-fund complete-milestone u1 u1)
+    ```
 
 ### For Verifiers 🔍
 
@@ -83,6 +94,8 @@ cd my-reclamation-fund
 | `add-verifier` | Add authorized verifier | Contract Owner |
 | `remove-verifier` | Remove verifier authorization | Contract Owner |
 | `emergency-release` | Emergency fund release | Contract Owner |
+| `add-milestone` | Add restoration milestone | Project Owner |
+| `complete-milestone` | Mark milestone as completed | Project Owner |
 
 ### Read-Only Functions
 
@@ -93,6 +106,8 @@ cd my-reclamation-fund
 | `is-verifier` | Check if address is authorized verifier |
 | `get-contract-stats` | View contract statistics |
 | `get-contract-balance` | Check contract balance |
+| `get-milestone` | Retrieve milestone details |
+| `get-project-milestones` | Get total milestones for project |
 
 ## 📊 Project Status Flow
 
@@ -150,6 +165,10 @@ MIT License - see LICENSE file for details
 ## 🌟 Impact
 
 This contract ensures environmental accountability in mining operations, protecting ecosystems and communities from abandoned extraction sites. By requiring upfront deposits and verified restoration, we create financial incentives for responsible mining practices.
+
+### 🎯 Project Milestones Enhancement
+
+The new milestone tracking system enables granular progress monitoring throughout the restoration process. Companies can define specific checkpoints like "Site assessment completed," "Topsoil replacement finished," or "Vegetation establishment achieved," providing stakeholders with detailed visibility into restoration progress and fostering greater transparency in environmental rehabilitation efforts.
 
 ---
 

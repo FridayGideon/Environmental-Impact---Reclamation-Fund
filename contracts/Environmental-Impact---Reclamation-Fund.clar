@@ -7,8 +7,8 @@
 (define-constant ERR_FUNDS_ALREADY_RELEASED u403)
 (define-constant ERR_PROJECT_NOT_ACTIVE u405)
 
-(define-map projects 
-    {project-id: uint} 
+(define-map projects
+    {project-id: uint}
     {
         company: principal,
         deposit-amount: uint,
@@ -17,15 +17,25 @@
         status: (string-ascii 20),
         created-at: uint,
         verified-at: (optional uint),
-        released-at: (optional uint)
+        released-at: (optional uint),
+        milestones-count: uint
     }
 )
 
 (define-map verifiers principal bool)
 
-(define-map project-verifications 
-    {project-id: uint, verifier: principal} 
+(define-map project-verifications
+    {project-id: uint, verifier: principal}
     {verified: bool, timestamp: uint}
+)
+
+(define-map project-milestones
+    {project-id: uint, milestone-id: uint}
+    {
+        description: (string-ascii 256),
+        completed: bool,
+        completed-at: (optional uint)
+    }
 )
 
 (define-data-var next-project-id uint u1)
@@ -74,7 +84,7 @@
         
         (try! (stx-transfer? deposit-amount tx-sender (as-contract tx-sender)))
         
-        (map-set projects 
+        (map-set projects
             {project-id: project-id}
             {
                 company: tx-sender,
@@ -84,7 +94,8 @@
                 status: "active",
                 created-at: stacks-block-height,
                 verified-at: none,
-                released-at: none
+                released-at: none,
+                milestones-count: u0
             }
         )
         
@@ -228,4 +239,62 @@
 
 (define-read-only (get-next-project-id)
     (var-get next-project-id)
+)
+
+(define-public (add-milestone (project-id uint) (description (string-ascii 256)))
+    (let
+        (
+            (project (unwrap! (map-get? projects {project-id: project-id}) (err ERR_PROJECT_NOT_FOUND)))
+            (company (get company project))
+            (current-milestones (get milestones-count project))
+            (new-milestone-id (+ current-milestones u1))
+        )
+        (asserts! (is-eq tx-sender company) (err ERR_NOT_AUTHORIZED))
+        (asserts! (is-eq (get status project) "active") (err ERR_PROJECT_NOT_ACTIVE))
+        (map-set project-milestones
+            {project-id: project-id, milestone-id: new-milestone-id}
+            {
+                description: description,
+                completed: false,
+                completed-at: none
+            }
+        )
+        (map-set projects
+            {project-id: project-id}
+            (merge project {milestones-count: new-milestone-id})
+        )
+        (ok new-milestone-id)
+    )
+)
+
+(define-public (complete-milestone (project-id uint) (milestone-id uint))
+    (let
+        (
+            (project (unwrap! (map-get? projects {project-id: project-id}) (err ERR_PROJECT_NOT_FOUND)))
+            (company (get company project))
+            (milestone (unwrap! (map-get? project-milestones {project-id: project-id, milestone-id: milestone-id}) (err ERR_INVALID_VERIFICATION)))
+        )
+        (asserts! (is-eq tx-sender company) (err ERR_NOT_AUTHORIZED))
+        (asserts! (is-eq (get status project) "active") (err ERR_PROJECT_NOT_ACTIVE))
+        (asserts! (not (get completed milestone)) (err ERR_INVALID_VERIFICATION))
+        (map-set project-milestones
+            {project-id: project-id, milestone-id: milestone-id}
+            (merge milestone {completed: true, completed-at: (some stacks-block-height)})
+        )
+        (ok milestone-id)
+    )
+)
+
+(define-read-only (get-milestone (project-id uint) (milestone-id uint))
+    (map-get? project-milestones {project-id: project-id, milestone-id: milestone-id})
+)
+
+(define-read-only (get-project-milestones (project-id uint))
+    (let
+        (
+            (project (unwrap! (map-get? projects {project-id: project-id}) (err ERR_PROJECT_NOT_FOUND)))
+            (milestones-count (get milestones-count project))
+        )
+        (ok milestones-count)
+    )
 )
