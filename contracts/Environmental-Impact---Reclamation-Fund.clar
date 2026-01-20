@@ -298,3 +298,16 @@
         (ok milestones-count)
     )
 )
+
+(define-public (transfer-project-ownership (project-id uint) (new-owner principal))
+    (let
+        (
+            (project (unwrap! (map-get? projects {project-id: project-id}) (err ERR_PROJECT_NOT_FOUND)))
+            (current-owner (get company project))
+        )
+        (asserts! (is-eq tx-sender current-owner) (err ERR_NOT_AUTHORIZED))
+        (asserts! (not (is-eq new-owner current-owner)) (err ERR_INVALID_VERIFICATION))
+        (asserts! (is-eq (get status project) "active") (err ERR_PROJECT_NOT_ACTIVE))
+        (ok (map-set projects {project-id: project-id} (merge project {company: new-owner})))
+    )
+)

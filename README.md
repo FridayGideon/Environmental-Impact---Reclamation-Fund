@@ -172,4 +172,14 @@ The new milestone tracking system enables granular progress monitoring throughou
 
 ---
 
+### 🏢 Project Ownership Transfer Enhancement
+
+Introducing seamless project ownership transfers to empower mining companies with greater operational flexibility. This feature enables companies to reassign project ownership during active status, supporting scenarios like corporate restructuring, mergers, or strategic partnerships. By allowing direct principal transfers, the contract maintains security through strict authorization checks while providing the agility needed in dynamic business environments.
+
+Key capabilities include:
+- 🔄 **Instant Ownership Reassignment**: Transfer projects to new principals without disrupting escrow protection
+- 🛡️ **Secure Authorization**: Only current project owners can initiate transfers
+- 📋 **Active Project Focus**: Transfers restricted to active projects to prevent manipulation
+- 🚫 **Duplicate Prevention**: Blocks transfers to the same owner to avoid unnecessary operations
+
 *Built with 💚 for environmental protection*
